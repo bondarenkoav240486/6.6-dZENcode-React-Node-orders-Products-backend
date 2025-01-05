@@ -1,21 +1,30 @@
-// filepath: /D:/Education_and_work/6.6-dZENcode-React-Node-orders-Products-backend/server.js
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+const { orders, products } = require('./db');
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: 'http://localhost:3000',
-    methods: ['GET', 'POST']
-  }
+    methods: ['GET', 'POST'],
+  },
 });
 
 app.use(cors({
-  origin: 'http://localhost:3000'
+  origin: 'http://localhost:3000',
 }));
+
+app.get('/api/orders', (req, res) => {
+  res.json(orders);
+});
+
+app.get('/api/products', (req, res) => {
+    res.json(products);
+  });
+  
 
 let activeSessions = 0;
 
