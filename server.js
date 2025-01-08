@@ -36,22 +36,22 @@ mongoose.connect(mongoUri, {
 });
 
 const userSchema = new mongoose.Schema({
-  username: String,
+  email: String,
   password: String,
 });
 
 const User = mongoose.model('User', userSchema);
 
 app.post('/api/auth/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Username already exists' });
+      return res.status(400).json({ message: 'Email already exists' });
     }
 
-    const newUser = new User({ username, password });
+    const newUser = new User({ email, password });
     await newUser.save();
 
     return res.status(201).json({ message: 'User registered successfully' });
@@ -61,12 +61,16 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 app.post('/api/auth/login', async (req, res) => {
-  const { username, password } = req.body;
-
+  const { email, password } = req.body;
+  console.log(email, "   ", password)
+  // Перевірка на валідність email та пароль
   try {
-    const user = await User.findOne({ username, password });
+    const user = await User.findOne({ email, password });
+    console.log(user)
     if (user) {
-      const token = jwt.sign({ username }, secretKey, { expiresIn: '1h' });
+    console.log(user)
+
+      const token = jwt.sign({ email }, secretKey, { expiresIn: '1m' }); // Змінено час життя токена на 1 хвилину
       return res.status(200).json({ token });
     } else {
       return res.status(401).json({ message: 'Invalid credentials' });
