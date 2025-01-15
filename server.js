@@ -5,7 +5,9 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const { orders, products } = require('./db');
+const authRoutes = require('./routes/authRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -35,58 +37,59 @@ mongoose.connect(mongoUri, {
   console.error('Error connecting to MongoDB:', error.message);
 });
 
-const userSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-});
+app.use('/api/auth', authRoutes);
+app.use('/api', orderRoutes);
+app.use('/api', productRoutes);
 
-const User = mongoose.model('User', userSchema);
+// const userSchema = new mongoose.Schema({
+//   email: String,
+//   password: String,
+// });
 
-app.post('/api/auth/register', async (req, res) => {
-  const { email, password } = req.body;
+// const User = mongoose.model('User', userSchema);
 
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email already exists' });
-    }
+// app.post('/api/auth/register', async (req, res) => {
+//   const { email, password } = req.body;
 
-    const newUser = new User({ email, password });
-    await newUser.save();
+//   try {
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res.status(400).json({ message: 'Email already exists' });
+//     }
 
-    return res.status(201).json({ message: 'User registered successfully' });
-  } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
+//     const newUser = new User({ email, password });
+//     await newUser.save();
 
-app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body;
-  console.log(email, "   ", password)
-  // Перевірка на валідність email та пароль
-  try {
-    const user = await User.findOne({ email, password });
-    console.log(user)
-    if (user) {
-    console.log(user)
+//     return res.status(201).json({ message: 'User registered successfully' });
+//   } catch (error) {
+//     return res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
 
-      const token = jwt.sign({ email }, secretKey, { expiresIn: '1m' }); // Змінено час життя токена на 1 хвилину
-      return res.status(200).json({ token });
-    } else {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-  } catch (error) {
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-});
+// app.post('/api/auth/login', async (req, res) => {
+//   const { email, password } = req.body;
+//   // Перевірка на валідність email та пароль
+//   try {
+//     const user = await User.findOne({ email, password });
+//     if (user) {
 
-app.get('/api/orders', (req, res) => {
-  res.json(orders);
-});
+//       const token = jwt.sign({ email }, secretKey, { expiresIn: '1m' }); // Змінено час життя токена на 1 хвилину
+//       return res.status(200).json({ token });
+//     } else {
+//       return res.status(401).json({ message: 'Invalid credentials' });
+//     }
+//   } catch (error) {
+//     return res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
 
-app.get('/api/products', (req, res) => {
-  res.json(products);
-});
+// app.get('/api/orders', (req, res) => {
+//   res.json(orders);
+// });
+
+// app.get('/api/products', (req, res) => {
+//   res.json(products);
+// });
 
 let activeSessions = 0;
 
