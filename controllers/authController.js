@@ -14,8 +14,9 @@ const registerUser = async (req, res) => {
 
     const newUser = new User({ email, password });
     await newUser.save();
-
-    return res.status(201).json({ message: 'User registered successfully' });
+    const token = jwt.sign({ email }, secretKey, { expiresIn: '1m' }); // Змінено час життя токена на 1 хвилину
+    
+    return res.status(201).json({ message: 'User registered successfully',token });
   } catch (error) {
     return res.status(500).json({ message: 'Internal server error' });
   }

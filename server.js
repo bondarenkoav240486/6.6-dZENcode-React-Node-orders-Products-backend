@@ -13,13 +13,14 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: process.env.CLIENT_URL || 'http://localhost:3000',
     methods: ['GET', 'POST'],
   },
 });
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  methods: ['GET', 'POST'],
 }));
 
 app.use(express.json());
@@ -40,56 +41,6 @@ mongoose.connect(mongoUri, {
 app.use('/api/auth', authRoutes);
 app.use('/api', orderRoutes);
 app.use('/api', productRoutes);
-
-// const userSchema = new mongoose.Schema({
-//   email: String,
-//   password: String,
-// });
-
-// const User = mongoose.model('User', userSchema);
-
-// app.post('/api/auth/register', async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       return res.status(400).json({ message: 'Email already exists' });
-//     }
-
-//     const newUser = new User({ email, password });
-//     await newUser.save();
-
-//     return res.status(201).json({ message: 'User registered successfully' });
-//   } catch (error) {
-//     return res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
-
-// app.post('/api/auth/login', async (req, res) => {
-//   const { email, password } = req.body;
-//   // Перевірка на валідність email та пароль
-//   try {
-//     const user = await User.findOne({ email, password });
-//     if (user) {
-
-//       const token = jwt.sign({ email }, secretKey, { expiresIn: '1m' }); // Змінено час життя токена на 1 хвилину
-//       return res.status(200).json({ token });
-//     } else {
-//       return res.status(401).json({ message: 'Invalid credentials' });
-//     }
-//   } catch (error) {
-//     return res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
-
-// app.get('/api/orders', (req, res) => {
-//   res.json(orders);
-// });
-
-// app.get('/api/products', (req, res) => {
-//   res.json(products);
-// });
 
 let activeSessions = 0;
 
@@ -112,7 +63,7 @@ io.on('connection', (socket) => {
 });
 
 // Запуск сервера
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
